@@ -48,7 +48,7 @@ void t4()
     printf("size_hundert:%i\n",yices_term_bitsize(hundert));
     //yices_redcomp
 	//yices_bveq_atom
-    term_t t = yices_bveq_atom(add_a_b_c,hundert);
+    term_t t = yices_redcomp(add_a_b_c,hundert);
     yices_pp_term(stdout, t, 120, 2, 6);
 
     code = yices_assert_formula(ctx, t);
