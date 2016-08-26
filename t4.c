@@ -35,23 +35,24 @@ void t4()
     term_t c = yices_new_uninterpreted_term(bv_type);
 	term_t add_a_b = yices_bvadd(a,b);
 
-    yices_pp_term(stdout, add_a_b, 120, 2, 6);
-	yices_pp_term(stdout, a, 120, 2, 6);
+    //yices_pp_term(stdout, add_a_b, 120, 2, 6);
+	//yices_pp_term(stdout, a, 120, 2, 6);
 
     term_t add_a_b_c = yices_bvadd(add_a_b,c);
-    yices_pp_term(stdout, add_a_b_c, 120, 2, 6);
+    //yices_pp_term(stdout, add_a_b_c, 120, 2, 6);
 
-    term_t hundert = yices_parse_bvbin("00000000000000000000000001100100");
-    yices_pp_term(stdout, hundert, 120, 2, 6);
+    term_t hundert = yices_bvconst_int32(32, 100);
+    //yices_pp_term(stdout, hundert, 120, 2, 6);
 	
-    printf("size_a:%i\n",yices_term_bitsize(a));
+    printf("size_a_b_c:%i\n",yices_term_bitsize(add_a_b_c));
     printf("size_hundert:%i\n",yices_term_bitsize(hundert));
     //yices_redcomp
 	//yices_bveq_atom
     term_t t = yices_redcomp(add_a_b_c,hundert);
-    yices_pp_term(stdout, t, 120, 2, 6);
-
-    code = yices_assert_formula(ctx, t);
+    //yices_pp_term(stdout, t, 120, 2, 6);
+    term_t t0 = yices_neq(t,yices_bvconst_zero(1));
+    yices_pp_term(stdout, t0, 120, 2, 6);
+    code = yices_assert_formula(ctx, t0);
     
   if (code < 0) {
     printf("Assert failed: ");
