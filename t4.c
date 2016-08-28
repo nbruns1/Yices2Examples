@@ -14,7 +14,7 @@
 static void print_term(term_t term) {
   int32_t code;
 
-  code = yices_pp_term(stdout, term, 120, 40, 0);
+  code = yices_pp_term(stdout, term, 8000, 1, 0);
   if (code < 0) {
     // An error occurred
     fprintf(stderr, "Error in print_term: ");
@@ -33,25 +33,26 @@ void t4()
     term_t a = yices_new_uninterpreted_term(bv_type);
     term_t b = yices_new_uninterpreted_term(bv_type);
     term_t c = yices_new_uninterpreted_term(bv_type);
-	term_t add_a_b = yices_bvadd(a,b);
+	term_t zehn = yices_bvconst_int32(32, 10);
+	term_t zwanzig = yices_bvconst_int32(32, 20);
+	term_t zweihundert = yices_bvconst_int32(32, 200);
+	term_t hundert = yices_bvconst_int32(32, 100);
 
-    //yices_pp_term(stdout, add_a_b, 120, 2, 6);
-	//yices_pp_term(stdout, a, 120, 2, 6);
+	term_t zehn_kleiner_a = yices_bvle_atom(zehn,a);
+	code = yices_assert_formula(ctx, zehn_kleiner_a);
+
+	term_t a_kleiner_zwanzig = yices_bvle_atom(a,20);
+	code = yices_assert_formula(ctx, a_kleiner_zwanzig);
+
+	term_t add_a_b = yices_bvadd(a,b);
+	term_t add_a_b_gleich_c = yices_redcomp(add_a_b,c);
+	term_t e = yices_neq(add_a_b_gleich_c,yices_bvconst_zero(1));
+	code = yices_assert_formula(ctx, e);
 
     term_t add_a_b_c = yices_bvadd(add_a_b,c);
-    //yices_pp_term(stdout, add_a_b_c, 120, 2, 6);
-
-    term_t hundert = yices_bvconst_int32(32, 100);
-    //yices_pp_term(stdout, hundert, 120, 2, 6);
-	
-    printf("size_a_b_c:%i\n",yices_term_bitsize(add_a_b_c));
-    printf("size_hundert:%i\n",yices_term_bitsize(hundert));
-    //yices_redcomp
-	//yices_bveq_atom
+	term_t add_a_b_c_kleiner_zweihundert = yices_bvle_atom(add_a_b_c,zweihundert);
     term_t t = yices_redcomp(add_a_b_c,hundert);
-    //yices_pp_term(stdout, t, 120, 2, 6);
     term_t t0 = yices_neq(t,yices_bvconst_zero(1));
-    yices_pp_term(stdout, t0, 120, 2, 6);
     code = yices_assert_formula(ctx, t0);
     
   if (code < 0) {
