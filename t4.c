@@ -41,26 +41,46 @@ void t4()
 	term_t zehn_kleiner_a = yices_bvle_atom(zehn,a);
 	code = yices_assert_formula(ctx, zehn_kleiner_a);
 
-	term_t a_kleiner_zwanzig = yices_bvle_atom(a,20);
+    if (code < 0) {
+    printf("Assert0 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+	term_t a_kleiner_zwanzig = yices_bvle_atom(a,zwanzig);
 	code = yices_assert_formula(ctx, a_kleiner_zwanzig);
+
+    if (code < 0) {
+    printf("Assert1 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
 
 	term_t add_a_b = yices_bvadd(a,b);
 	term_t add_a_b_gleich_c = yices_redcomp(add_a_b,c);
 	term_t e = yices_neq(add_a_b_gleich_c,yices_bvconst_zero(1));
 	code = yices_assert_formula(ctx, e);
 
+    if (code < 0) {
+    printf("Assert2 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
     term_t add_a_b_c = yices_bvadd(add_a_b,c);
 	term_t add_a_b_c_kleiner_zweihundert = yices_bvle_atom(add_a_b_c,zweihundert);
     term_t t = yices_redcomp(add_a_b_c,hundert);
     term_t t0 = yices_neq(t,yices_bvconst_zero(1));
     code = yices_assert_formula(ctx, t0);
     
-  if (code < 0) {
-    printf("Assert failed: ");
+    if (code < 0) {
+    printf("Assert3 failed: ");
     yices_print_error(stdout);
     fflush(stdout);
     return;
-  }
+    }
 
   switch (yices_check_context(ctx, NULL)) { // NULL means default heuristics
   case STATUS_SAT:
