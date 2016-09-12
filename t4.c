@@ -23,16 +23,54 @@ static void print_term(term_t term) {
   }
 }
 
+void solve(context_t *ctx)
+{
+int32_t code;
+model_t *mdl;
+switch (yices_check_context(ctx, NULL)) { // NULL means default heuristics
+  case STATUS_SAT:
+    // build the model and print it
+    printf("Satisfiable\n");
+    mdl = yices_get_model(ctx, true);
+    code = yices_pp_model(stdout, mdl, 120, 100, 0);
+    if (code < 0) {
+      printf("Print model failed: ");
+      yices_print_error(stdout);
+      fflush(stdout);
+      return;
+    }
+    // cleanup: delete the model
+    yices_free_model(mdl);
+    break;
+
+  case STATUS_UNSAT:
+    printf("Unsatisfiable\n");
+    break;
+
+  case STATUS_UNKNOWN:
+    printf("Status is unknown\n");
+    break;
+
+  case STATUS_IDLE:
+  case STATUS_SEARCHING:
+  case STATUS_INTERRUPTED:
+  case STATUS_ERROR:
+    // these codes should not be returned
+    printf("Bug: unexpected status returned\n");
+    break;
+  }
+}
+
 void t4()
 {
     int32_t code;
     context_t *ctx;
-    model_t *mdl;
 	ctx = yices_new_context(NULL);
     type_t bv_type = yices_bv_type(32);
     term_t a = yices_new_uninterpreted_term(bv_type);
     term_t b = yices_new_uninterpreted_term(bv_type);
     term_t c = yices_new_uninterpreted_term(bv_type);
+    term_t zero = yices_bvconst_int32(32, 0);
 	term_t zehn = yices_bvconst_int32(32, 10);
 	term_t zwanzig = yices_bvconst_int32(32, 20);
 	term_t zweihundert = yices_bvconst_int32(32, 200);
@@ -82,38 +120,77 @@ void t4()
     return;
     }
 
-  switch (yices_check_context(ctx, NULL)) { // NULL means default heuristics
-  case STATUS_SAT:
-    // build the model and print it
-    printf("Satisfiable\n");
-    mdl = yices_get_model(ctx, true);
-    code = yices_pp_model(stdout, mdl, 120, 100, 0);
-    if (code < 0) {
-      printf("Print model failed: ");
-      yices_print_error(stdout);
-      fflush(stdout);
-      return;
+	if(yices_push(ctx) != 0)
+	{
+    printf("push0 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
     }
-    // cleanup: delete the model
-    yices_free_model(mdl);
-    break;
 
-  case STATUS_UNSAT:
-    printf("Unsatisfiable\n");
-    break;
+    term_t b_gleich_constant0 = yices_redcomp(b,zero);
+    term_t b_gleich_constant1 = yices_neq(b_gleich_constant0,yices_bvconst_zero(1));
 
-  case STATUS_UNKNOWN:
-    printf("Status is unknown\n");
-    break;
+    code = yices_assert_formula(ctx, b_gleich_constant1);
+    
+    if (code < 0) {
+    printf("Assert4 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
 
-  case STATUS_IDLE:
-  case STATUS_SEARCHING:
-  case STATUS_INTERRUPTED:
-  case STATUS_ERROR:
-    // these codes should not be returned
-    printf("Bug: unexpected status returned\n");
-    break;
-  }
+    term_t c_gleich_constant0 = yices_redcomp(b,zero);
+    term_t c_gleich_constant1 = yices_neq(b_gleich_constant0,yices_bvconst_zero(1));
+
+    code = yices_assert_formula(ctx, c_gleich_constant1);
+    
+    if (code < 0) {
+    printf("Assert5 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+	solve(ctx);
+	
+	if(yices_pop(ctx) != 0)
+	{
+    printf("pop0 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+	if(yices_push(ctx) != 0)
+	{
+    printf("push1 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+    code = yices_assert_formula(ctx, c_gleich_constant1);
+    
+    if (code < 0) {
+    printf("Assert6 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+	solve(ctx);
+
+	if(yices_pop(ctx) != 0)
+	{
+    printf("pop1 failed: ");
+    yices_print_error(stdout);
+    fflush(stdout);
+    return;
+    }
+
+	solve(ctx);
+	
 
   /*
    * Delete the context: this is optional since yices_exit
