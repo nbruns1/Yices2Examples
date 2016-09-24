@@ -60,8 +60,8 @@ void t4()
 
 	solver_backend.assumption(b_gleich_constant1);
 
-    term_t c_gleich_constant0 = yices_redcomp(b,zero);
-    term_t c_gleich_constant1 = yices_neq(b_gleich_constant0,yices_bvconst_zero(1));
+    term_t c_gleich_constant0 = yices_redcomp(c,zero);
+    term_t c_gleich_constant1 = yices_neq(c_gleich_constant0,yices_bvconst_zero(1));
 
 	solver_backend.assumption(c_gleich_constant1);
 	solver_backend.solve();
